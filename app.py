@@ -21,8 +21,11 @@ class Telegram:
         self.chat_id = chat_id
 
     def send_message(self, msg):
-        requests.get(
-            f"https://api.telegram.org/bot{self.token}/sendMessage?text={msg}&chat_id={self.chat_id}")
+        while True:
+            sleep(1)
+            res = requests.get(f"https://api.telegram.org/bot{self.token}/sendMessage?text={msg}&chat_id={self.chat_id}")
+            if res.ok:
+                break
 
 
 class Feed:
@@ -30,11 +33,13 @@ class Feed:
         self.lang = lang
         self.period = period
 
-
     def get_feed(self):
         url = f'https://ghapi.huchen.dev/repositories?language={self.lang}&since={self.period}'
-        res = requests.get(url).json()
-        return [v for msg in res for k, v in msg.items() if k == 'url']
+        while True:
+            sleep(1)
+            res = requests.get(url)
+            if res.ok:
+                return [v for msg in res.json() for k, v in msg.items() if k == 'url']
 
 
 def feed(chat_id, lang, period):
@@ -59,10 +64,6 @@ def feed(chat_id, lang, period):
             if len(start_feed) == 0:
                 start_feed = new_feed
 
-                for i in start_feed:
-                    tg.send_message(i)
-                    sleep(5)
-
                 if len(start_feed) > 30:
                     del(start_feed[:5])
 
@@ -71,12 +72,9 @@ def feed(chat_id, lang, period):
                     start_feed.append(item)
                     tg.send_message(item)
                     sleep(5)
-
-            sleep(7200)
-
+            sleep(3600)
     except Exception as e:
         tg.send_message(e)
-        print(str(e))
 
 
 def main():
