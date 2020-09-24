@@ -4,12 +4,6 @@ from time import sleep
 from threading import Thread
 
 
-# store to db in future ...
-feed_py = []
-feed_js = []
-feed_trend = []
-
-
 def get_config():
     with open("config/config.json", "r") as read_file:
         return json.load(read_file)
@@ -43,36 +37,16 @@ class Feed:
 
 
 def feed(chat_id, lang, period):
-    global feed_py
-    global feed_js
-    global feed_trend
-
     try:
-        if lang == 'python':
-            start_feed = feed_py
-        elif lang == 'javascript':
-            start_feed = feed_js
-        elif lang == 'jupyter-notebook':
-            start_feed = feed_trend
-
         feed_instance = Feed(lang, period)
         tg = Telegram(chat_id)
 
         while True:
             new_feed = feed_instance.get_feed()
-
-            if len(start_feed) == 0:
-                start_feed = new_feed
-
-                if len(start_feed) > 30:
-                    del(start_feed[:5])
-
             for item in new_feed:
-                if item not in start_feed:
-                    start_feed.append(item)
-                    tg.send_message(item)
-                    sleep(5)
-            sleep(3600)
+                tg.send_message(item)
+                sleep(5)
+            sleep(84600)
     except Exception as e:
         tg.send_message(e)
 
@@ -90,7 +64,6 @@ def main():
     t1.start()
     t2.start()
     t3.start()
-
 
 
 if __name__ == "__main__":
