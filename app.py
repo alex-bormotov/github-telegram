@@ -1,7 +1,11 @@
 import json
 import requests
 from time import sleep
-from threading import Thread
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+
+
+last_run_date = None
 
 
 def get_config():
@@ -9,62 +13,63 @@ def get_config():
         return json.load(read_file)
 
 
-class Telegram:
-    def __init__(self, chat_id):
-        self.token = get_config()["telegram_token"]
-        self.chat_id = chat_id
-
-    def send_message(self, msg):
-        while True:
-            sleep(1)
-            res = requests.get(f"https://api.telegram.org/bot{self.token}/sendMessage?text={msg}&chat_id={self.chat_id}")
-            if res.ok:
-                break
+def telegram_send_message(telegram_token, chat_id, msg):
+    while True:
+        sleep(1)
+        res = requests.get(
+            f"https://api.telegram.org/bot{telegram_token}/sendMessage?text={msg}&chat_id={chat_id}&parse_mode=MARKDOWN")
+        if res.json().get('ok'):
+            break
 
 
-class Feed:
-    def __init__(self, lang, period):
-        self.lang = lang
-        self.period = period
-
-    def get_feed(self):
-        url = f'https://ghapi.huchen.dev/repositories?language={self.lang}&since={self.period}'
-        while True:
-            sleep(1)
-            res = requests.get(url)
-            if res.ok:
-                return [v for msg in res.json() for k, v in msg.items() if k == 'url']
+def get_res(url):
+    while True:
+        sleep(5)
+        res = requests.get(url)
+        if res.ok:
+            return res
 
 
-def feed(chat_id, lang, period):
-    try:
-        feed_instance = Feed(lang, period)
-        tg = Telegram(chat_id)
-
-        while True:
-            new_feed = feed_instance.get_feed()
-            for item in new_feed:
-                tg.send_message(item)
-                sleep(5)
-            sleep(84600)
-    except Exception as e:
-        tg.send_message(e)
+def get_feed(url):
+    formated_articles = []
+    res = get_res(url).text
+    soup = BeautifulSoup(res, 'html.parser')
+    articles = soup.find_all("article", {"class": "Box-row"})
+    for article in articles:
+        title = article.h1.text.replace(
+            ' ', '').replace('\n', '').split('/')[1]
+        description = article.p.text.replace(
+            '\n', '').lstrip().rstrip()
+        stars = article('a', {'class': "muted-link d-inline-block mr-3"}
+                        )[0].text.replace(' ', '').replace('\n', '')
+        stars_total = f'{stars} stars total'
+        stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
+            0].text.replace('\n', '').lstrip().rstrip()
+        link = article.h1.a.text.replace(' ', '').replace('\n', '')
+        final_link = f"https://github.com/{link}"
+        formated_articles.append(
+            f'*{title}*\n\n{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
+    return formated_articles
 
 
 def main():
-    channels = [v for k, v in get_config().items() if 'channel' in k]
-
-    t1 = Thread(target=feed, args=(
-        channels[0][0], channels[0][1], channels[0][2]),)
-    t2 = Thread(target=feed, args=(
-        channels[1][0], channels[1][1], channels[1][2]),)
-    t3 = Thread(target=feed, args=(
-        channels[2][0], channels[2][1], channels[2][2]),)
-
-    t1.start()
-    t2.start()
-    t3.start()
+    global last_run_date
+    try:
+        config = get_config()
+        telegram_token = config['telegram_token']
+        chat_id = config['chat_id']
+        coding_lang = config['coding_lang']
+        url = f'https://github.com/trending/{coding_lang}?since=daily'
+        if last_run_date == None or datetime.utcnow() > last_run_date + timedelta(days=1):
+            msgs = get_feed(url)
+            for msg in msgs:
+                telegram_send_message(telegram_token, chat_id, msg)
+            last_run_date = datetime.utcnow()
+    except Exception as e:
+        telegram_send_message(telegram_token, chat_id, str(e))
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        sleep(3600)
+        main()

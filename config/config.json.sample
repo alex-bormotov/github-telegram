@@ -1,18 +1,5 @@
 {
     "telegram_token": "telegram_token",
-    "channel_1": [
-        "@MyChannelchatId",
-        "python",
-        "daily"
-    ],
-    "channel_2": [
-        "@MyChannelchatId",
-        "javascript",
-        "daily"
-    ],
-    "channel_3": [
-        "@MyChannelchatId",
-        "programming_language",
-        "daily"
-    ]
+    "chat_id": "@chat_id",
+    "coding_lang": "python"
 }
