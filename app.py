@@ -38,8 +38,11 @@ def get_feed(url):
     for article in articles:
         title = article.h1.text.replace(
             ' ', '').replace('\n', '').split('/')[1]
-        description = article.p.text.replace(
-            '\n', '').lstrip().rstrip()
+        try:
+            description = article.p.text.replace(
+                '\n', '').lstrip().rstrip()
+        except:
+            description = 'No description'
         stars = article('a', {'class': "muted-link d-inline-block mr-3"}
                         )[0].text.replace(' ', '').replace('\n', '')
         stars_total = f'{stars} stars total'
