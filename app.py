@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
 
-last_run_date = None
+last_run_date = datetime.utcnow() - timedelta(days=1)
 
 
 def get_config():
@@ -60,7 +60,7 @@ def main():
         chat_id = config['chat_id']
         coding_lang = config['coding_lang']
         url = f'https://github.com/trending/{coding_lang}?since=daily'
-        if last_run_date == None or datetime.utcnow() > last_run_date + timedelta(days=1):
+        if datetime.utcnow() > last_run_date + timedelta(days=1):
             msgs = get_feed(url)
             for msg in msgs:
                 telegram_send_message(telegram_token, chat_id, msg)
@@ -71,5 +71,4 @@ def main():
 
 if __name__ == "__main__":
     while True:
-        sleep(3600)
         main()
