@@ -63,7 +63,7 @@ def main():
         telegram_token = config['telegram_token']
         chat_id = config['chat_id']
         coding_lang = config['coding_lang']
-        url = f'https://github.com/trending/{coding_lang}?since=daily'
+        url = f'https://github.com/trending/{coding_lang}?since=daily&spoken_language_code=en'
         if datetime.utcnow() > last_run_date + timedelta(days=1):
             msgs = get_feed(url)
             for msg in msgs:
