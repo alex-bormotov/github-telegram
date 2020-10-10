@@ -25,7 +25,8 @@ def telegram_send_message(telegram_token, chat_id, msg):
 def get_res(url):
     while True:
         sleep(5)
-        res = requests.get(url)
+        headers = {'User-Agent':'Chrome/85.0.4183.121'}
+        res = requests.get(url, headers=headers)
         if res.ok:
             return res
 
