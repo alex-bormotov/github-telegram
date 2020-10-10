@@ -15,20 +15,20 @@ def get_config():
 
 def telegram_send_message(telegram_token, chat_id, msg):
     while True:
-        sleep(1)
         res = requests.get(
             f"https://api.telegram.org/bot{telegram_token}/sendMessage?text={msg}&chat_id={chat_id}&parse_mode=MARKDOWN")
         if res.json().get('ok'):
             break
+        sleep(5)
 
 
 def get_res(url):
     while True:
-        sleep(5)
         headers = {'User-Agent':'Chrome/85.0.4183.121'}
         res = requests.get(url, headers=headers)
         if res.ok:
             return res
+        sleep(5)
 
 
 def get_feed(url):
@@ -68,6 +68,7 @@ def main():
             msgs = get_feed(url)
             for msg in msgs:
                 telegram_send_message(telegram_token, chat_id, msg)
+                sleep(5)
             last_run_date = datetime.utcnow()
     except Exception as e:
         telegram_send_message(telegram_token, chat_id, str(e))
