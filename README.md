@@ -1,4 +1,4 @@
-# Github Trends to Telegram channel
+# Github Trending Repositories to Telegram channel
 
 ![](https://github.com/alex-bormotov/github-telegram/workflows/Github-CICD/badge.svg)   [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c1c1c58f3a1e488091aac12ae1d7127e)](https://www.codacy.com/manual/alex-bormotov/github-telegram?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=alex-bormotov/github-telegram&amp;utm_campaign=Badge_Grade)
 
