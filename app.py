@@ -56,6 +56,13 @@ def get_feed(url):
     return formated_articles
 
 
+def get_messages(url):
+    while True:
+        msgs = get_feed(url)
+        if len(msgs) == 25:
+            return msgs
+
+
 def main():
     global last_run_date
     try:
@@ -65,7 +72,7 @@ def main():
         coding_lang = config['coding_lang']
         url = f'https://github.com/trending/{coding_lang}?since=daily&spoken_language_code=en'
         if datetime.utcnow() > last_run_date + timedelta(days=1):
-            msgs = get_feed(url)
+            msgs = get_messages(url)
             for msg in msgs:
                 telegram_send_message(telegram_token, chat_id, msg)
                 sleep(5)
