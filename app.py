@@ -42,7 +42,7 @@ def get_feed(url):
         try:
             description = article.p.text.replace(
                 '\n', '').lstrip().rstrip()
-        except:
+        except Exception:
             description = 'No description'
         stars = article('a', {'class': "muted-link d-inline-block mr-3"}
                         )[0].text.replace(' ', '').replace('\n', '')
