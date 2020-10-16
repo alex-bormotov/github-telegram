@@ -50,10 +50,9 @@ def get_feed(url):
         stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
             0].text.replace('\n', '').lstrip().rstrip()
         link = article.h1.a.text.replace(' ', '').replace('\n', '')
-        if len(link) > 0:
-            final_link = f"https://github.com/{link}"
-            formated_articles.append(
-                f'*{title}*\n\n{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
+        final_link = f"https://github.com/{link}"
+        formated_articles.append(
+            f'*{title}*\n\n{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
     return formated_articles
 
 
@@ -75,6 +74,8 @@ def main():
         if datetime.utcnow() > last_run_date + timedelta(days=1):
             msgs = get_messages(url)
             for msg in msgs:
+                if '&' in msg:
+                    msg = msg.replace('&', '')
                 telegram_send_message(telegram_token, chat_id, msg)
                 sleep(5)
             last_run_date = datetime.utcnow()
