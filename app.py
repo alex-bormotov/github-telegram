@@ -1,3 +1,4 @@
+import re
 import json
 import requests
 from time import sleep
@@ -14,6 +15,7 @@ def get_config():
 
 
 def telegram_send_message(telegram_token, chat_id, msg):
+    print(msg)
     while True:
         res = requests.get(
             f"https://api.telegram.org/bot{telegram_token}/sendMessage?text={msg}&chat_id={chat_id}&parse_mode=MARKDOWN")
@@ -24,7 +26,7 @@ def telegram_send_message(telegram_token, chat_id, msg):
 
 def get_res(url):
     while True:
-        headers = {'User-Agent':'Chrome/85.0.4183.121'}
+        headers = {'User-Agent': 'Chrome/85.0.4183.121'}
         res = requests.get(url, headers=headers)
         if res.ok:
             return res
@@ -42,27 +44,16 @@ def get_feed(url):
                 '\n', '').lstrip().rstrip()
         except Exception:
             description = 'No description'
-        if '&' in description:
-            description = description.replace('&', '')
-        if '/' in description:
-            description = description.replace('/', '')
-        try:
-            stars = article('a', {'class': "muted-link d-inline-block mr-3"}
-                            )[0].text.replace(' ', '').replace('\n', '')
-        except Exception:
-            stars = "Something wrong (stars) ..."
-        try:
-            stars_total = f'{stars} stars total'
-            stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
-                0].text.replace('\n', '').lstrip().rstrip()
-        except Exception:
-            stars_total = "Something wrong (stars_total) ..."
-        try:
-            link = article.h1.a.text.replace(' ', '').replace('\n', '')
-            final_link = f"https://github.com/{link}"
-        except Exception:
-            stars_total = "Something wrong (link) ..."
-        formated_articles.append(f'{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
+        description = re.sub(r'[^a-zA-Z0-9 \n\.]', '', description)
+        stars = article('a', {'class': "muted-link d-inline-block mr-3"}
+                        )[0].text.replace(' ', '').replace('\n', '')
+        stars_total = f'{stars} stars total'
+        stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
+            0].text.replace('\n', '').lstrip().rstrip()
+        link = article.h1.a.text.replace(' ', '').replace('\n', '')
+        final_link = f"https://github.com/{link}"
+        formated_articles.append(
+            f'{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
     return formated_articles
 
 
