@@ -38,15 +38,14 @@ def get_feed(url):
     articles = soup.find_all("article", {"class": "Box-row"})
     for article in articles:
         try:
-            title = article.h1.text.replace(
-                ' ', '').replace('\n', '').split('/')[1]
-        except Exception:
-            title = "Something wrong (title) ..."
-        try:
             description = article.p.text.replace(
                 '\n', '').lstrip().rstrip()
         except Exception:
             description = 'No description'
+        if '&' in description:
+            description = description.replace('&', '')
+        if '/' in description:
+            description = description.replace('/', '')
         try:
             stars = article('a', {'class': "muted-link d-inline-block mr-3"}
                             )[0].text.replace(' ', '').replace('\n', '')
@@ -63,8 +62,7 @@ def get_feed(url):
             final_link = f"https://github.com/{link}"
         except Exception:
             stars_total = "Something wrong (link) ..."
-        formated_articles.append(
-            f'*{title}*\n\n{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
+        formated_articles.append(f'{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
     return formated_articles
 
 
@@ -79,8 +77,6 @@ def main():
         if datetime.utcnow() > last_run_date + timedelta(days=1):
             msgs = get_feed(url)
             for msg in msgs:
-                if '&' in msg:
-                    msg = msg.replace('&', '')
                 telegram_send_message(telegram_token, chat_id, msg)
                 sleep(5)
             last_run_date = datetime.utcnow()
