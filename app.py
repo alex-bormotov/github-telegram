@@ -37,30 +37,35 @@ def get_feed(url):
     soup = BeautifulSoup(res, 'html.parser')
     articles = soup.find_all("article", {"class": "Box-row"})
     for article in articles:
-        title = article.h1.text.replace(
-            ' ', '').replace('\n', '').split('/')[1]
+        try:
+            title = article.h1.text.replace(
+                ' ', '').replace('\n', '').split('/')[1]
+        except Exception:
+            title = "Something wrong (title) ..."
         try:
             description = article.p.text.replace(
                 '\n', '').lstrip().rstrip()
         except Exception:
             description = 'No description'
-        stars = article('a', {'class': "muted-link d-inline-block mr-3"}
-                        )[0].text.replace(' ', '').replace('\n', '')
-        stars_total = f'{stars} stars total'
-        stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
-            0].text.replace('\n', '').lstrip().rstrip()
-        link = article.h1.a.text.replace(' ', '').replace('\n', '')
-        final_link = f"https://github.com/{link}"
+        try:
+            stars = article('a', {'class': "muted-link d-inline-block mr-3"}
+                            )[0].text.replace(' ', '').replace('\n', '')
+        except Exception:
+            stars = "Something wrong (stars) ..."
+        try:
+            stars_total = f'{stars} stars total'
+            stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
+                0].text.replace('\n', '').lstrip().rstrip()
+        except Exception:
+            stars_total = "Something wrong (stars_total) ..."
+        try:
+            link = article.h1.a.text.replace(' ', '').replace('\n', '')
+            final_link = f"https://github.com/{link}"
+        except Exception:
+            stars_total = "Something wrong (link) ..."
         formated_articles.append(
             f'*{title}*\n\n{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
     return formated_articles
-
-
-def get_messages(url):
-    while True:
-        msgs = get_feed(url)
-        if len(msgs) == 25:
-            return msgs
 
 
 def main():
@@ -72,7 +77,7 @@ def main():
         coding_lang = config['coding_lang']
         url = f'https://github.com/trending/{coding_lang}?since=daily&spoken_language_code=en'
         if datetime.utcnow() > last_run_date + timedelta(days=1):
-            msgs = get_messages(url)
+            msgs = get_feed(url)
             for msg in msgs:
                 if '&' in msg:
                     msg = msg.replace('&', '')
