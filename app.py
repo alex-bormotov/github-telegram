@@ -45,11 +45,15 @@ def get_feed(url):
         except Exception:
             description = 'No description'
         description = re.sub(r'[^a-zA-Z0-9 \n\.]', '', description)
-        stars = article('a', {'class': "muted-link d-inline-block mr-3"}
-                        )[0].text.replace(' ', '').replace('\n', '')
-        stars_total = f'{stars} stars total'
-        stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
-            0].text.replace('\n', '').lstrip().rstrip()
+        try:
+            stars = article('a', {'class': "muted-link d-inline-block mr-3"}
+                            )[0].text.replace(' ', '').replace('\n', '')
+            stars_total = f'{stars} stars total'
+            stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
+                0].text.replace('\n', '').lstrip().rstrip()
+        except Exception:
+            stars_total = ''
+            stars_today = ''
         link = article.h1.a.text.replace(' ', '').replace('\n', '')
         final_link = f"https://github.com/{link}"
         formated_articles.append(
