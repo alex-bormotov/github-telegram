@@ -2,11 +2,8 @@ import re
 import json
 import requests
 from time import sleep
+from datetime import datetime
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
-
-
-last_run_date = datetime.utcnow() - timedelta(days=1)
 
 
 def get_config():
@@ -62,19 +59,17 @@ def get_feed(url):
 
 
 def main():
-    global last_run_date
     try:
         config = get_config()
         telegram_token = config['telegram_token']
         chat_id = config['chat_id']
         coding_lang = config['coding_lang']
         url = f'https://github.com/trending/{coding_lang}?since=daily&spoken_language_code=en'
-        if datetime.utcnow() > last_run_date + timedelta(days=1):
+        if datetime.strftime(datetime.utcnow(), '%H:%M:%S') == '04:00:00':
             msgs = get_feed(url)
             for msg in msgs:
                 telegram_send_message(telegram_token, chat_id, msg)
                 sleep(5)
-            last_run_date = datetime.utcnow()
     except Exception as e:
         telegram_send_message(telegram_token, chat_id, str(e))
 
