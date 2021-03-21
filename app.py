@@ -43,7 +43,7 @@ def get_feed(url):
             description = 'No description'
         description = re.sub(r'[^a-zA-Z0-9 \n\.]', '', description)
         try:
-            stars = article('a', {'class': "muted-link d-inline-block mr-3"}
+            stars = article('a', {'class': "Link--muted d-inline-block mr-3"}
                             )[0].text.replace(' ', '').replace('\n', '')
             stars_total = f'{stars} stars total'
             stars_today = article('span', {'class': 'd-inline-block float-sm-right'})[
