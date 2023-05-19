@@ -51,7 +51,7 @@ def get_feed(url):
         except Exception:
             stars_total = ''
             stars_today = ''
-        link = article.h1.a.text.replace(' ', '').replace('\n', '')
+        link = article.h2.a['href']
         final_link = f"https://github.com/{link}"
         formated_articles.append(
             f'{description}\n\n*{stars_total}*\n\n*{stars_today}*\n\n[View on Github.com]({final_link})')
